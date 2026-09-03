@@ -1,0 +1,165 @@
+:root {
+  --bg: #0a0e1a;
+  --bg-panel: rgba(19, 26, 46, 0.72);
+  --border-glow: rgba(79, 209, 255, 0.28);
+  --accent-cyan: #4fd1ff;
+  --accent-violet: #a78bfa;
+  --accent-amber: #f59e0b;
+  --accent-orange: #fb923c;
+  --text: #e8eef8;
+  --text-dim: #8b96ad;
+  --font-mono: "JetBrains Mono", "Consolas", monospace;
+  --font-size-base: 16px;
+  --font-size-xs: 13px;
+  --font-size-sm: 14px;
+  --font-size-md: 15px;
+  --font-size-lg: 20px;
+  --shadow-depth: 0 8px 20px -6px rgba(0, 0, 0, 0.55);
+  --shadow-depth-elevated: 0 16px 36px -10px rgba(0, 0, 0, 0.65);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: radial-gradient(circle at 20% 0%, #131a2e 0%, var(--bg) 55%);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+}
+
+.glass-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-glow);
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-depth), 0 0 24px -8px var(--border-glow);
+}
+
+.glow-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent-amber), transparent);
+  opacity: 0.7;
+}
+
+.active-process-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.86);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.active-process-overlay.is-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.active-process-card {
+  width: 216px;
+  height: 216px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  text-align: center;
+  background: var(--bg-panel);
+  border: 1px solid var(--accent-amber);
+  border-radius: 12px;
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 0 32px -6px var(--accent-orange),
+    inset 0 0 18px -10px var(--accent-amber),
+    var(--shadow-depth-elevated);
+  animation: active-process-pop 0.4s ease;
+}
+
+.active-process-card__pip {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-orange);
+  box-shadow: 0 0 10px var(--accent-orange);
+}
+
+.active-process-card__actor {
+  font-size: var(--font-size-lg);
+  letter-spacing: 0.14em;
+  color: var(--accent-amber);
+  text-transform: lowercase;
+}
+
+.active-process-card__label {
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.06em;
+  color: var(--text);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@keyframes active-process-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.dockview-theme-hud {
+  --dv-paneview-active-outline-color: var(--accent-cyan);
+  --dv-tabs-and-actions-container-font-size: var(--font-size-md);
+  --dv-tabs-and-actions-container-height: 35px;
+  --dv-drag-over-background-color: rgba(79, 209, 255, 0.18);
+  --dv-drag-over-border-color: var(--accent-cyan);
+  --dv-edge-dock-indicator-color: var(--accent-cyan);
+  --dv-tabs-container-scrollbar-color: var(--text-dim);
+  --dv-icon-hover-background-color: rgba(79, 209, 255, 0.12);
+  --dv-floating-box-shadow: var(--shadow-depth-elevated);
+  --dv-floating-border: 1px solid var(--border-glow);
+  --dv-overlay-z-index: 999;
+  --dv-tab-font-size: inherit;
+  --dv-border-radius: 8px;
+  --dv-tab-margin: 0;
+  --dv-sash-color: transparent;
+  --dv-active-sash-color: var(--accent-cyan);
+  --dv-active-sash-transition-duration: 0.1s;
+  --dv-active-sash-transition-delay: 0.5s;
+  --dv-group-view-background-color: transparent;
+  --dv-tabs-and-actions-container-background-color: var(--bg);
+  --dv-activegroup-visiblepanel-tab-background-color: var(--bg-panel);
+  --dv-activegroup-visiblepanel-tab-color: var(--accent-cyan);
+  --dv-activegroup-hiddenpanel-tab-background-color: var(--bg);
+  --dv-activegroup-hiddenpanel-tab-color: var(--text-dim);
+  --dv-inactivegroup-visiblepanel-tab-background-color: var(--bg-panel);
+  --dv-inactivegroup-visiblepanel-tab-color: var(--text);
+  --dv-inactivegroup-hiddenpanel-tab-background-color: var(--bg);
+  --dv-inactivegroup-hiddenpanel-tab-color: var(--text-dim);
+  --dv-tab-divider-color: var(--border-glow);
+  --dv-separator-border: var(--border-glow);
+  --dv-paneview-header-border-color: var(--border-glow);
+  height: 100%;
+  width: 100%;
+}
