@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import {
-  ACTIVE_WORKERS_POLL_MS,
-  fetchActiveWorkers,
-  IDLE_WORKERS,
-  type ActiveWorker,
-  type FetchActiveWorkersResult,
-} from "../services/activeWorkersClient";
+  AGENTS_POLL_MS,
+  fetchAgents,
+  IDLE_AGENTS,
+  type Agent,
+  type FetchAgentsResult,
+} from "../services/agentsClient";
 
-type PanelState = FetchActiveWorkersResult | { loading: true };
+type PanelState = FetchAgentsResult | { loading: true };
 
 export default function ActiveModelsPanel(): JSX.Element {
   const [state, setState] = useState<PanelState>({ loading: true });
@@ -17,14 +17,14 @@ export default function ActiveModelsPanel(): JSX.Element {
     let cancelled = false;
 
     const load = async (): Promise<void> => {
-      const result = await fetchActiveWorkers();
+      const result = await fetchAgents();
       if (!cancelled) setState(result);
     };
 
     void load();
     const id = window.setInterval(() => {
       void load();
-    }, ACTIVE_WORKERS_POLL_MS);
+    }, AGENTS_POLL_MS);
 
     return () => {
       cancelled = true;
@@ -33,8 +33,8 @@ export default function ActiveModelsPanel(): JSX.Element {
   }, []);
 
   const connected = "ok" in state && state.ok;
-  const workers = connected ? state.workers : IDLE_WORKERS;
-  const busyCount = workers.filter((w) => w.status === "busy").length;
+  const agents = connected ? state.agents : IDLE_AGENTS;
+  const busyCount = agents.filter((a) => a.status === "busy").length;
 
   const toggle = (id: string): void => {
     setOpenIds((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -80,12 +80,12 @@ export default function ActiveModelsPanel(): JSX.Element {
           gap: "8px",
         }}
       >
-        {workers.map((worker) => (
-          <WorkerCard
-            key={worker.id}
-            worker={worker}
-            open={Boolean(openIds[worker.id])}
-            onToggle={() => toggle(worker.id)}
+        {agents.map((agent) => (
+          <AgentCard
+            key={agent.id}
+            agent={agent}
+            open={Boolean(openIds[agent.id])}
+            onToggle={() => toggle(agent.id)}
           />
         ))}
       </div>
@@ -93,16 +93,16 @@ export default function ActiveModelsPanel(): JSX.Element {
   );
 }
 
-function WorkerCard({
-  worker,
+function AgentCard({
+  agent,
   open,
   onToggle,
 }: {
-  worker: ActiveWorker;
+  agent: Agent;
   open: boolean;
   onToggle: () => void;
 }): JSX.Element {
-  const busy = worker.status === "busy";
+  const busy = agent.status === "busy";
   const pip = busy ? "var(--accent-cyan)" : "var(--text-dim)";
   const labelColor = busy ? "var(--accent-cyan)" : "var(--text-dim)";
 
@@ -138,9 +138,9 @@ function WorkerCard({
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
           }}
-          title={worker.label}
+          title={agent.label}
         >
-          {worker.label}
+          {agent.label}
         </span>
         <span
           style={{
@@ -163,10 +163,10 @@ function WorkerCard({
               boxShadow: busy ? `0 0 8px ${pip}` : "none",
             }}
           />
-          {worker.status}
+          {agent.status}
         </span>
       </div>
-      {worker.task ? (
+      {agent.task ? (
         <div
           style={{
             fontSize: "14px",
@@ -176,9 +176,9 @@ function WorkerCard({
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
           }}
-          title={worker.task}
+          title={agent.task}
         >
-          {worker.task}
+          {agent.task}
         </div>
       ) : null}
       {open ? (
@@ -194,7 +194,7 @@ function WorkerCard({
             wordBreak: "break-word",
           }}
         >
-          {worker.detail ?? "detay yok"}
+          {agent.detail ?? "detay yok"}
         </div>
       ) : null}
     </article>

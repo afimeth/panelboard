@@ -9,7 +9,7 @@ export type Task = {
   id: string;
   title: string;
   status: TaskStatus;
-  worker: string;
+  assignee: string;
   mtimeIso: string;
 };
 
@@ -22,7 +22,7 @@ type TasksResponse = {
     id?: unknown;
     title?: unknown;
     status?: unknown;
-    worker?: unknown;
+    assignee?: unknown;
     mtimeIso?: unknown;
   }>;
 };
@@ -57,9 +57,9 @@ export async function fetchTasks(): Promise<FetchTasksResult> {
         const id = asText(entry.id) || `task-${index}`;
         const title = asText(entry.title) || id;
         const status = asStatus(entry.status);
-        const worker = asText(entry.worker);
+        const assignee = asText(entry.assignee);
         const mtimeIso = asText(entry.mtimeIso);
-        return { id, title, status, worker, mtimeIso };
+        return { id, title, status, assignee, mtimeIso };
       })
       .filter((task) => task.id.length > 0);
     return { ok: true, tasks };

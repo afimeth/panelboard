@@ -1,25 +1,25 @@
-export const ACTIVE_WORKERS_BASE_URL = "http://localhost:4317";
-export const ACTIVE_WORKERS_POLL_MS = 5000;
+export const AGENTS_BASE_URL = "http://localhost:4317";
+export const AGENTS_POLL_MS = 5000;
 
 const FETCH_TIMEOUT_MS = 5000;
 
-export type WorkerStatus = "idle" | "busy";
+export type AgentStatus = "idle" | "busy";
 
-export type ActiveWorker = {
+export type Agent = {
   id: string;
   label: string;
-  status: WorkerStatus;
+  status: AgentStatus;
   task: string | null;
   detail: string | null;
   since: string | null;
 };
 
-export type FetchActiveWorkersResult =
-  | { ok: true; workers: ActiveWorker[] }
+export type FetchAgentsResult =
+  | { ok: true; agents: Agent[] }
   | { ok: false };
 
-type ActiveWorkersResponse = {
-  workers?: Array<{
+type AgentsResponse = {
+  agents?: Array<{
     id?: unknown;
     label?: unknown;
     status?: unknown;
@@ -29,9 +29,9 @@ type ActiveWorkersResponse = {
   }>;
 };
 
-export const IDLE_WORKERS: ActiveWorker[] = [
+export const IDLE_AGENTS: Agent[] = [
   { id: "agent-primary", label: "assistant", status: "idle", task: null, detail: null, since: null },
-  { id: "api-worker", label: "api service", status: "idle", task: null, detail: null, since: null },
+  { id: "api-agent", label: "api service", status: "idle", task: null, detail: null, since: null },
   { id: "local-llm", label: "qwen2.5-coder", status: "idle", task: null, detail: null, since: null },
 ];
 
@@ -44,18 +44,18 @@ function asNullableText(value: unknown): string | null {
   return text.length > 0 ? text : null;
 }
 
-function asStatus(value: unknown): WorkerStatus {
+function asStatus(value: unknown): AgentStatus {
   return asText(value).toLowerCase() === "busy" ? "busy" : "idle";
 }
 
-function mergeWorkers(list: ActiveWorkersResponse["workers"]): ActiveWorker[] {
+function mergeAgents(list: AgentsResponse["agents"]): Agent[] {
   const rows = Array.isArray(list) ? list : [];
   const byId = new Map<string, (typeof rows)[number]>();
   for (const entry of rows) {
     const id = asText(entry.id);
     if (id) byId.set(id, entry);
   }
-  return IDLE_WORKERS.map((fallback) => {
+  return IDLE_AGENTS.map((fallback) => {
     const row = byId.get(fallback.id);
     if (!row) return { ...fallback };
     return {
@@ -69,19 +69,19 @@ function mergeWorkers(list: ActiveWorkersResponse["workers"]): ActiveWorker[] {
   });
 }
 
-export async function fetchActiveWorkers(): Promise<FetchActiveWorkersResult> {
+export async function fetchAgents(): Promise<FetchAgentsResult> {
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
-    const res = await fetch(`${ACTIVE_WORKERS_BASE_URL}/active-workers`, {
+    const res = await fetch(`${AGENTS_BASE_URL}/agents`, {
       method: "GET",
       signal: controller.signal,
     });
     if (!res.ok) {
       return { ok: false };
     }
-    const body = (await res.json()) as ActiveWorkersResponse;
-    return { ok: true, workers: mergeWorkers(body.workers) };
+    const body = (await res.json()) as AgentsResponse;
+    return { ok: true, agents: mergeAgents(body.agents) };
   } catch {
     return { ok: false };
   } finally {

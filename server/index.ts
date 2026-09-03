@@ -13,7 +13,7 @@ const API_USAGE_PATH = join(ROOT_DIR, "docs", "ai", "api-usage.jsonl");
 const TASKS_DIR = join(ROOT_DIR, "docs", "ai", "tasks");
 const DOCS_AI_DIR = join(ROOT_DIR, "docs", "ai");
 const ACTIVE_PROCESS_PATH = join(ROOT_DIR, "docs", "ai", "active-process.json");
-const ACTIVE_WORKERS_PATH = join(ROOT_DIR, "docs", "ai", "active-workers.json");
+const AGENTS_PATH = join(ROOT_DIR, "docs", "ai", "agents.json");
 const DOCS_PREVIEW_CHARS = 500;
 
 type ActiveProcess = {
@@ -280,7 +280,7 @@ type Task = {
   id: string;
   title: string;
   status: TaskStatus;
-  worker: string;
+  assignee: string;
   mtimeIso: string;
 };
 
@@ -344,16 +344,16 @@ async function listTasks(): Promise<Task[]> {
     const id = heading?.id ?? name.replace(/\.md$/i, "");
     const title = heading?.title ?? id;
     const status = parseTaskStatus(parseTaskField(lines, "Status"));
-    const worker = parseTaskField(lines, "Worker") || "unknown";
-    rows.push({ id, title, status, worker, mtimeIso, mtimeMs });
+    const assignee = parseTaskField(lines, "Assignee") || "unknown";
+    rows.push({ id, title, status, assignee, mtimeIso, mtimeMs });
   }
 
   rows.sort((a, b) => b.mtimeMs - a.mtimeMs);
-  return rows.map(({ id, title, status, worker, mtimeIso }) => ({
+  return rows.map(({ id, title, status, assignee, mtimeIso }) => ({
     id,
     title,
     status,
-    worker,
+    assignee,
     mtimeIso,
   }));
 }
@@ -449,20 +449,20 @@ async function readActiveProcess(): Promise<ActiveProcess> {
   }
 }
 
-type WorkerStatus = "idle" | "busy";
+type AgentStatus = "idle" | "busy";
 
-type ActiveWorker = {
+type Agent = {
   id: string;
   label: string;
-  status: WorkerStatus;
+  status: AgentStatus;
   task: string | null;
   detail: string | null;
   since: string | null;
 };
 
-const IDLE_WORKERS: ActiveWorker[] = [
+const IDLE_AGENTS: Agent[] = [
   { id: "agent-primary", label: "assistant", status: "idle", task: null, detail: null, since: null },
-  { id: "api-worker", label: "api service", status: "idle", task: null, detail: null, since: null },
+  { id: "api-agent", label: "api service", status: "idle", task: null, detail: null, since: null },
   { id: "local-llm", label: "qwen2.5-coder", status: "idle", task: null, detail: null, since: null },
 ];
 
@@ -471,43 +471,43 @@ function asNullableText(value: unknown): string | null {
   return text.length > 0 ? text : null;
 }
 
-function parseWorkerStatus(value: unknown): WorkerStatus {
+function parseAgentStatus(value: unknown): AgentStatus {
   return asText(value).toLowerCase() === "busy" ? "busy" : "idle";
 }
 
-function parseActiveWorker(value: unknown, fallback: ActiveWorker): ActiveWorker {
+function parseAgent(value: unknown, fallback: Agent): Agent {
   if (value === null || typeof value !== "object") return fallback;
   const row = value as Record<string, unknown>;
   return {
     id: fallback.id,
     label: asText(row.label) || fallback.label,
-    status: parseWorkerStatus(row.status),
+    status: parseAgentStatus(row.status),
     task: asNullableText(row.task),
     detail: asNullableText(row.detail),
     since: asNullableText(row.since),
   };
 }
 
-function parseActiveWorkers(value: unknown): ActiveWorker[] {
-  if (value === null || typeof value !== "object") return IDLE_WORKERS.map((w) => ({ ...w }));
+function parseAgents(value: unknown): Agent[] {
+  if (value === null || typeof value !== "object") return IDLE_AGENTS.map((a) => ({ ...a }));
   const row = value as Record<string, unknown>;
-  const list = Array.isArray(row.workers) ? row.workers : [];
+  const list = Array.isArray(row.agents) ? row.agents : [];
   const byId = new Map<string, unknown>();
   for (const entry of list) {
     if (entry === null || typeof entry !== "object") continue;
     const id = asText((entry as Record<string, unknown>).id);
     if (id) byId.set(id, entry);
   }
-  return IDLE_WORKERS.map((fallback) => parseActiveWorker(byId.get(fallback.id), fallback));
+  return IDLE_AGENTS.map((fallback) => parseAgent(byId.get(fallback.id), fallback));
 }
 
-async function readActiveWorkers(): Promise<ActiveWorker[]> {
+async function readAgents(): Promise<Agent[]> {
   try {
-    const raw = await readFile(ACTIVE_WORKERS_PATH, "utf8");
+    const raw = await readFile(AGENTS_PATH, "utf8");
     const parsed = JSON.parse(raw.replace(/^\uFEFF/, "").trim()) as unknown;
-    return parseActiveWorkers(parsed);
+    return parseAgents(parsed);
   } catch {
-    return IDLE_WORKERS.map((w) => ({ ...w }));
+    return IDLE_AGENTS.map((a) => ({ ...a }));
   }
 }
 
@@ -562,9 +562,9 @@ async function handle(req: IncomingMessage, res: ServerResponse): Promise<void> 
     return;
   }
 
-  if (req.method === "GET" && url.pathname === "/active-workers") {
-    const workers = await readActiveWorkers();
-    send(res, 200, { workers });
+  if (req.method === "GET" && url.pathname === "/agents") {
+    const agents = await readAgents();
+    send(res, 200, { agents });
     return;
   }
 

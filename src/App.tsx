@@ -42,7 +42,7 @@ export default function App(): JSX.Element {
           letterSpacing: "0.08em",
         }}
       >
-        <span>SPACEWORK</span>
+        <span>PANELBOARD</span>
         <span style={{ color: "var(--text-dim)" }}>SYS NOMINAL</span>
         <span>{time}</span>
       </header>

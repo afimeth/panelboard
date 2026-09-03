@@ -1,6 +1,6 @@
-# Spacework
+# Panelboard
 
-Spacework, iki farklı arayüz fikrini tek bir çalışma alanında birleştiren bir
+Panelboard, iki farklı arayüz fikrini tek bir çalışma alanında birleştiren bir
 ön yüz prototipidir:
 
 - **Dockable panel sistemi** ([dockview-react](https://github.com/mathuo/dockview)

@@ -131,7 +131,7 @@ function HudLine({
 function TaskRow({ task }: { task: Task }): JSX.Element {
   const color = STATUS_COLOR[task.status];
   const title = asciiLower(task.title);
-  const worker = asciiLower(task.worker || "unknown");
+  const assignee = asciiLower(task.assignee || "unknown");
 
   return (
     <div
@@ -207,7 +207,7 @@ function TaskRow({ task }: { task: Task }): JSX.Element {
         >
           {title}
         </span>
-        <span style={{ flexShrink: 0 }}>{worker}</span>
+        <span style={{ flexShrink: 0 }}>{assignee}</span>
       </div>
     </div>
   );
